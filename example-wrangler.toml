@@ -1,0 +1,6 @@
+name = "maintenancemode"
+type = "javascript"
+private = false
+zone_id = "INSERT YOUR ZONE ID IN HERE"
+account_id = "INSERT YOUR ACCOUNT ID IN HERE"
+route = "https://*.example.com/*"
