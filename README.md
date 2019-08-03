@@ -8,6 +8,7 @@ MaintenanceMode is a Cloudflare Workers script that can do several things, but m
 - Log requests to a Discord webhook (log visitor IP, request method, full request URL, the ASN, and the Cloudflare datacenter the request hit)
 
 ## Installation
+> These docs assume that you have a website proxied by Cloudflare (setup with Cloudflare's nameservers and not via CNAME setup) and that you've already gone ahead and enabled [Cloudflare Workers](https://cloudflare.com/workers) on your Cloudflare-proxied website. Workers offers 100,000 free requests per day as well so what are you waiting for? lol :)
 
 Before you do anything, install [Wrangler CLI](https://github.com/cloudflare/wrangler) first.
 
