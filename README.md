@@ -4,7 +4,8 @@ MaintenanceMode is a Cloudflare Workers script that can do several things, but m
 
 - Lets you setup a serverless maintenance page that automatically triggers when it finds an active maintenance on your StatusPage.io status page
 - Lets you setup a serverless downtime page that automatically triggers when it finds an active incident on your StatusPage.io status page
-- Lets you manually trigger either the maintenance or downtime pages
+- Lets you setup a serverless DDoS page which you can manually enable if you are under a DDoS attack.
+- Lets you manually trigger either the maintenance or downtime pages.
 - Log requests to a Discord webhook (log visitor IP, request method, full request URL, the ASN, and the Cloudflare datacenter the request hit)
 
 ## Installation
@@ -39,17 +40,25 @@ To get your StatusPage.io page ID,
 
 Your page's ID will be under the `Page ID` field. Copy/paste it into the `config.statuspage_id` string in `index.js`
 
-#### Force-enabling maintenance/downtime pages
+#### Force-enabling maintenance/downtime/DDoS pages
 
-If you want to forcefully enable the maintenance or downtime pages, you can set the `config.force_enable_maintenance` or `config.force_enable_downtime` booleans to `true`. Maintenance has priority over downtime.
+If you want to forcefully enable the maintenance or downtime pages, you can set the following fields in the `config` object:
+
+| Field Name | Default | Description |
+|------------|---------|-------------|
+| `config.force_enable_maintenance` | `false` | Forcefully toggles the showing of the maintenance page. |
+| `config.force_enable_downtime` | `false` | Forcefully toggles the showing of the downtime page. |
+| `config.force_enable_ddos` | `false` | Forcefully toggles the showing of the DDoS page. |
+
+**A useful tip**: *Maintenance has priority over downtime, which has priority over DDoS.*
 
 You _will_ need to re-deploy the Workers script each time you do this, but that's a small price to pay compared to paying for Workers KV.
 
-#### Customizing your maintenance/downtime pages
+#### Customizing your maintenance/downtime/DDoS pages
 
-You can customize the full HTML of the maintenance/downtime pages.
+You can customize the full HTML of the maintenance/downtime/DDoS pages.
 
-This HTML is stored in a string variable in the code called `MAINTENANCE_PAGE_HTML` (for the maintenance page) and `DOWNTIME_PAGE_HTML` (for the downtime page).
+This HTML is stored in a string variable in the code called `MAINTENANCE_PAGE_HTML` (for the maintenance page) and `DOWNTIME_PAGE_HTML` (for the downtime page), as well as `DDOS_PAGE_HTML` (for the DDoS page).
 
 I know you're about to say `WHY THE FUCK do you store it as a single line string constant?` to which my reply will be `idk portability ig` or `mate i made this script in the matter of a few hours what do you expect lol`.
 

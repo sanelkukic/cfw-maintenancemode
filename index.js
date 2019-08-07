@@ -1,8 +1,9 @@
 const config = {
-  script_version: "1.0.0",
+  script_version: "1.1.0",
   script_github: "https://github.com/xDrixxyz/cfw-maintenancemode",
   force_enable_maintenance: false,
   force_enable_downtime: false,
+  force_enable_ddos: false,
   statuspage: "https://status.example.com",
   statuspage_id: "insert your statuspage.io page id here",
   enable_discord_logging: true,
@@ -26,6 +27,14 @@ const DOWNTIME_PAGE_HTML =
   "'>cfw-maintenancemode</a> v" +
   config.script_version +
   "</h5>";
+const DDOS_PAGE_HTML =
+  "<h1>We're experiencing a DDoS attack</h1><p>Looks like someone decided to hit us with a DDoS attack. While we work on shielding our servers, you can monitor our <a href='"+
+  config.statuspage +
+  "'>status page</a> for important updates</p><br><br><h5>Powered by <a href='" +
+  config.script_github +
+  "'>cfw-maintenancemode</a> v" +
+  config.script_version +
+  "</h5>";
 
 async function handleRequest(request) {
   const init = {
@@ -38,6 +47,7 @@ async function handleRequest(request) {
     var maintenance_forced =
       config.force_enable_maintenance == true ? "Yes" : "No";
     var downtime_forced = config.force_enable_downtime == true ? "Yes" : "No";
+    var ddos_forced = config.force_enable_ddos == true ? "Yes" : "No";
     var asn, colo, ip, urlpath, reqmeth;
     try {
       asn = request.cf.asn;
@@ -79,6 +89,8 @@ async function handleRequest(request) {
             maintenance_forced +
             "`\n**Is downtime force-enabled?**: `" +
             downtime_forced +
+            "`\n**Is DDoS mode force-enabled?**: `"+
+            ddos_forced +
             "`",
           color: 11001111,
           fields: [
@@ -163,6 +175,11 @@ async function handleRequest(request) {
         });
       } else if (config.force_enable_downtime) {
         return new Response(DOWNTIME_PAGE_HTML, {
+          status: 500,
+          headers: { "content-type": "text/html" }
+        });
+      } else if (config.force_enable_ddos) {
+        return new Response(DDOS_PAGE_HTML, {
           status: 500,
           headers: { "content-type": "text/html" }
         });
