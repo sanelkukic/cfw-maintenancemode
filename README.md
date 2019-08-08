@@ -64,6 +64,15 @@ I know you're about to say `WHY THE FUCK do you store it as a single line string
 
 If you know JavaScript, you can also do string interpolation to include variables like your status page's URL in your HTML, since the HTML _is_ stored as a single-line string constant.
 
+#### Setting up IP-based whitelist for maintenance mode
+If you want to allow your developers' IPs to access your website even if maintenance mode is enabled, you can use the IP-based whitelist!
+
+To enable it, set the `enable_maintenance_ip_whitelist` boolean in the `config` object to `true`.
+
+Add the IPs to whitelist as strings into the `maintenance_ip_whitelist` array in the `config` object.
+
+This whitelist works both for force-enabled maintenance mode and automatically enabled maintenance mode (via StatusPage.io's API).
+
 ## Deploy with Wrangler
 
 If you haven't setup your Cloudflare account with Wrangler already, run:
