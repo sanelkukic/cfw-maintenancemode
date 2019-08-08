@@ -1,5 +1,5 @@
 const config = {
-  script_version: "1.1.0",
+  script_version: "1.2.0",
   script_github: "https://github.com/xDrixxyz/cfw-maintenancemode",
   force_enable_maintenance: false,
   force_enable_downtime: false,
@@ -8,7 +8,9 @@ const config = {
   statuspage_id: "insert your statuspage.io page id here",
   enable_discord_logging: true,
   discord_webhook:
-    "insert discord webhook url here"
+    "insert discord webhook url here",
+  enable_maintenance_ip_whitelist: false,
+  maintenance_ip_whitelist: []
 };
 
 const MAINTENANCE_PAGE_HTML =
@@ -43,23 +45,24 @@ async function handleRequest(request) {
     }
   };
 
+  var reported_ip;
+  if (request.headers.has("CF-Connecting-IP") && request.headers.get("CF-Connecting-IP") != "") {
+    reported_ip = request.headers.get("CF-Connecting-IP");
+  } else {
+    reported_ip = "Unknown";
+  }
   if (config.enable_discord_logging) {
     var maintenance_forced =
       config.force_enable_maintenance == true ? "Yes" : "No";
     var downtime_forced = config.force_enable_downtime == true ? "Yes" : "No";
     var ddos_forced = config.force_enable_ddos == true ? "Yes" : "No";
-    var asn, colo, ip, urlpath, reqmeth;
+    var asn, colo, urlpath, reqmeth;
     try {
       asn = request.cf.asn;
       colo = request.cf.colo;
     } catch (e) {
       asn = "000000";
       colo = "Unknown";
-    }
-    if (request.headers.has("CF-Connecting-IP")) {
-      ip = request.headers.get("CF-Connecting-IP");
-    } else {
-      ip = "Unknown";
     }
     if (
       request.url !== "" ||
@@ -106,7 +109,7 @@ async function handleRequest(request) {
             },
             {
               name: "IP",
-              value: ip,
+              value: reported_ip,
               inline: true
             },
             {
@@ -154,10 +157,15 @@ async function handleRequest(request) {
     }
   );
   if (results[0].status.indicator == "maintenance") {
-    return new Response(MAINTENANCE_PAGE_HTML, {
-      status: 503,
-      headers: { "content-type": "text/html" }
-    });
+    if (config.enable_maintenance_ip_whitelist) {
+      if (reported_ip != "Unknown" && config.maintenance_ip_whitelist.indexOf(reported_ip) > -1) {
+        return fetch(request);
+      } else {
+        return new Response(MAINTENANCE_PAGE_HTML, {status: 503, headers: {'content-type': 'text/html'}});
+      }
+    } else {
+      return new Response(MAINTENANCE_PAGE_HTML, {status: 503, headers: {'content-type': 'text/html'}});
+    }
   } else {
     if (
       results[0].status.indicator == "major" ||
@@ -169,10 +177,15 @@ async function handleRequest(request) {
       });
     } else {
       if (config.force_enable_maintenance) {
-        return new Response(MAINTENANCE_PAGE_HTML, {
-          status: 503,
-          headers: { "content-type": "text/html" }
-        });
+        if (config.enable_maintenance_ip_whitelist) {
+          if (reported_ip != "Unknown" && config.maintenance_ip_whitelist.indexOf(reported_ip) > -1) {
+            return fetch(request);
+          } else {
+            return new Response(MAINTENANCE_PAGE_HTML, {status: 503, headers: {'content-type': 'text/html'}});
+          }
+        } else {
+          return new Response(MAINTENANCE_PAGE_HTML, {status: 503, headers: {'content-type': 'text/html'}});
+        }
       } else if (config.force_enable_downtime) {
         return new Response(DOWNTIME_PAGE_HTML, {
           status: 500,
