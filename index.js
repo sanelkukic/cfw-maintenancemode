@@ -1,5 +1,5 @@
 const config = {
-  script_version: "1.2.0",
+  script_version: "1.3.0",
   script_github: "https://github.com/xDrixxyz/cfw-maintenancemode",
   force_enable_maintenance: false,
   force_enable_downtime: false,
@@ -10,7 +10,9 @@ const config = {
   discord_webhook:
     "insert discord webhook url here",
   enable_maintenance_ip_whitelist: false,
-  maintenance_ip_whitelist: []
+  maintenance_ip_whitelist: [],
+  enable_domain_whitelist: false,
+  domain_whitelist: []
 };
 
 const MAINTENANCE_PAGE_HTML =
@@ -44,6 +46,12 @@ async function handleRequest(request) {
       "content-type": type
     }
   };
+  var domain;
+  domain = new URL(request.url).hostname || "";
+
+  if (config.enable_domain_whitelist && domain != "" && config.domain_whitelist.indexOf(domain) > -1) {
+    return fetch(request);
+  }
 
   var reported_ip;
   if (request.headers.has("CF-Connecting-IP") && request.headers.get("CF-Connecting-IP") != "") {

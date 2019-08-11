@@ -7,6 +7,7 @@ MaintenanceMode is a Cloudflare Workers script that can do several things, but m
 - Lets you setup a serverless DDoS page which you can manually enable if you are under a DDoS attack.
 - Lets you manually trigger either the maintenance or downtime pages.
 - Log requests to a Discord webhook (log visitor IP, request method, full request URL, the ASN, and the Cloudflare datacenter the request hit)
+- Add subdomains to a whitelist so they bypass the Workers script (including the Discord webhook logging functionality) entirely.
 
 ## Installation
 > These docs assume that you have a website proxied by Cloudflare (setup with Cloudflare's nameservers and not via CNAME setup) and that you've already gone ahead and enabled [Cloudflare Workers](https://cloudflare.com/workers) on your Cloudflare-proxied website. Workers offers 100,000 free requests per day as well so what are you waiting for? lol :)
@@ -72,6 +73,22 @@ To enable it, set the `enable_maintenance_ip_whitelist` boolean in the `config` 
 Add the IPs to whitelist as strings into the `maintenance_ip_whitelist` array in the `config` object.
 
 This whitelist works both for force-enabled maintenance mode and automatically enabled maintenance mode (via StatusPage.io's API).
+
+#### Adding subdomains to the whitelist
+If you want a specific subdomain to bypass the Workers script entirely, which will also include bypassing the logging of requests to a Discord webhook (if configured), then you can add them to a domain whitelist.
+
+First, set `config.enable_domain_whitelist` to true.
+
+Then, add your subdomain (including base domain) to `config.domain_whitelist`. For example, if I wanted to whitelist `sub.example.com`, I would add the string `sub.example.com` to the array `config.domain_whitelist`.
+
+The `config.domain_whitelist` array would now look like:
+```
+["sub.example.com"]
+```
+
+And then re-deploy your script. Your subdomain should no longer get blocked if maintenance/downtime/DDoS mode is enabled. This override the force-enabled settings as well.
+
+I know you could just mess around with the route setting directly in Cloudflare, but this is a little easier if your routes are set to `*.example.com` (wildcard for all subdomains on `example.com`)
 
 ## Deploy with Wrangler
 
